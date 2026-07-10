@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Country extends Model
@@ -19,7 +20,7 @@ class Country extends Model
         'timezone',
         'language',
         'latitude',
-        'longitude'
+        'longitude',
     ];
 
     public function ports()
@@ -35,5 +36,20 @@ class Country extends Model
     public function economicIndicators()
     {
         return $this->hasMany(EconomicIndicator::class);
+    }
+
+    public function newsLogs()
+    {
+        return $this->hasMany(NewsLog::class);
+    }
+
+    public function originShipments()
+    {
+        return $this->hasMany(Shipment::class, 'origin_country_id');
+    }
+
+    public function destinationShipments()
+    {
+        return $this->hasMany(Shipment::class, 'destination_country_id');
     }
 }

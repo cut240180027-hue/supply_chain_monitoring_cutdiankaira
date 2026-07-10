@@ -2,57 +2,109 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Shipment;
+use Illuminate\Http\Request;
 
 class ShipmentController extends Controller
 {
+    /**
+     * Menampilkan daftar shipment.
+     */
     public function index()
     {
-        $shipments = Shipment::all();
+        $shipments = Shipment::latest()->paginate(10);
 
         return view('shipment.index', compact('shipments'));
     }
 
-    public function show($id)
-    {
-        $shipment = Shipment::findOrFail($id);
-
-        return view('shipment.show', compact('shipment'));
-    }
-
+    /**
+     * Menampilkan form tambah shipment.
+     */
     public function create()
     {
         return view('shipment.create');
     }
 
+    /**
+     * Menyimpan shipment baru.
+     */
     public function store(Request $request)
     {
+        $request->validate([
+            'shipment_code'      => 'required|unique:shipments',
+            'supplier'           => 'required',
+            'origin_country'     => 'required',
+            'destination_country'=> 'required',
+            'origin_port'        => 'required',
+            'destination_port'   => 'required',
+            'vessel_name'        => 'required',
+            'departure_date'     => 'required|date',
+            'estimated_arrival'  => 'required|date',
+            'status'             => 'required',
+            'risk_level'         => 'required',
+            'latitude'           => 'nullable',
+            'longitude'          => 'nullable',
+            'description'        => 'nullable',
+        ]);
+
         Shipment::create($request->all());
 
-        return redirect()->route('shipment.index');
+        return redirect()
+                ->route('shipments.index')
+                ->with('success','Shipment berhasil ditambahkan.');
     }
 
-    public function edit($id)
+    /**
+     * Detail shipment.
+     */
+    public function show(Shipment $shipment)
     {
-        $shipment = Shipment::findOrFail($id);
+        return view('shipment.show', compact('shipment'));
+    }
 
+    /**
+     * Form edit.
+     */
+    public function edit(Shipment $shipment)
+    {
         return view('shipment.edit', compact('shipment'));
     }
 
-    public function update(Request $request, $id)
+    /**
+     * Update shipment.
+     */
+    public function update(Request $request, Shipment $shipment)
     {
-        $shipment = Shipment::findOrFail($id);
+        $request->validate([
+            'shipment_code'      => 'required|unique:shipments,shipment_code,'.$shipment->id,
+            'supplier'           => 'required',
+            'origin_country'     => 'required',
+            'destination_country'=> 'required',
+            'origin_port'        => 'required',
+            'destination_port'   => 'required',
+            'vessel_name'        => 'required',
+            'departure_date'     => 'required|date',
+            'estimated_arrival'  => 'required|date',
+            'status'             => 'required',
+            'risk_level'         => 'required',
+        ]);
 
         $shipment->update($request->all());
 
-        return redirect()->route('shipment.index');
+        return redirect()
+                ->route('shipments.index')
+                ->with('success','Shipment berhasil diperbarui.');
     }
 
-    public function destroy($id)
+    /**
+     * Hapus shipment.
+     */
+    public function destroy(Shipment $shipment)
     {
-        Shipment::destroy($id);
+        $shipment->delete();
 
-        return redirect()->route('shipment.index');
+        return redirect()
+                ->route('shipments.index')
+                ->with('success','Shipment berhasil dihapus.');
     }
 }

@@ -7,7 +7,6 @@ use App\Models\Port;
 use App\Models\RiskScore;
 use App\Models\Shipment;
 use App\Models\Supplier;
-use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
@@ -20,9 +19,13 @@ class DashboardController extends Controller
             'ports' => Port::count(),
         ];
 
-        $recentShipments = Shipment::latest('created_at')->take(5)->get();
-        $riskAlerts = RiskScore::orderByDesc('score')->take(4)->get();
+        $recentShipments = Shipment::latest()->take(5)->get();
+        $riskAlerts = RiskScore::latest()->take(4)->get();
 
-        return view('dashboard', compact('stats', 'recentShipments', 'riskAlerts'));
+        return view('dashboard.index', compact(
+            'stats',
+            'recentShipments',
+            'riskAlerts'
+        ));
     }
 }

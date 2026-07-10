@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Shipment extends Model
@@ -15,10 +16,14 @@ class Shipment extends Model
         'destination_country_id',
         'origin_port_id',
         'destination_port_id',
+        'vessel_name',
         'departure_date',
-        'eta',
-        'arrival_date',
-        'status'
+        'estimated_arrival',
+        'status',
+        'risk_level',
+        'latitude',
+        'longitude',
+        'description',
     ];
 
     public function supplier()
@@ -46,18 +51,23 @@ class Shipment extends Model
         return $this->belongsTo(Port::class, 'destination_port_id');
     }
 
-    public function weatherLogs()
-    {
-        return $this->hasMany(WeatherLog::class);
-    }
-
     public function exchangeRates()
     {
         return $this->hasMany(ExchangeRate::class);
     }
 
+    public function weatherLogs()
+    {
+        return $this->hasMany(WeatherLog::class);
+    }
+
     public function riskScores()
     {
         return $this->hasMany(RiskScore::class);
+    }
+
+    public function newsLogs()
+    {
+        return $this->hasMany(NewsLog::class);
     }
 }
