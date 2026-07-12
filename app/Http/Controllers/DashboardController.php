@@ -12,6 +12,7 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        // Statistik Dashboard
         $stats = [
             'shipments' => Shipment::count(),
             'suppliers' => Supplier::count(),
@@ -19,13 +20,26 @@ class DashboardController extends Controller
             'ports' => Port::count(),
         ];
 
+        // Shipment terbaru
         $recentShipments = Shipment::latest()->take(5)->get();
-        $riskAlerts = RiskScore::latest()->take(4)->get();
+
+        // Risk Alert
+        $riskAlerts = RiskScore::latest()->take(5)->get();
+
+        // Data untuk peta
+        $shipmentsMap = Shipment::select(
+            'shipment_code',
+            'latitude',
+            'longitude',
+            'status',
+            'risk_level'
+        )->get();
 
         return view('dashboard.index', compact(
             'stats',
             'recentShipments',
-            'riskAlerts'
+            'riskAlerts',
+            'shipmentsMap'
         ));
     }
 }

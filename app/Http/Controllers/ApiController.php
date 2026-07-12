@@ -12,7 +12,7 @@ class ApiController extends Controller
 
         $exchange = Http::get('https://api.exchangerate-api.com/...')->json();
 
-        $country = Http::get('https://restcountries.com/v3.1/all')->json();
+        $country = Http::get('https://restcountries.com/api/v1/all')->json();
 
         $economy = Http::get('https://api.worldbank.org/...')->json();
 

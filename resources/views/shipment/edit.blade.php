@@ -6,52 +6,68 @@
 
 <div class="container-fluid">
 
-    <div class="row justify-content-center">
+    <div class="card shadow border-0 rounded-4">
 
-        <div class="col-lg-10">
+        <div class="card-header bg-white">
 
-            <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="mb-0">
+                <i class="bi bi-pencil-square text-warning"></i>
+                Edit Shipment
+            </h3>
 
-                <div>
+        </div>
 
-                    <h2 class="fw-bold">
-                        <i class="bi bi-pencil-square text-warning"></i>
-                        Edit Shipment
-                    </h2>
+        <div class="card-body">
 
-                    <p class="text-muted mb-0">
-                        Update shipment information
-                    </p>
+            @if ($errors->any())
+
+            <div class="alert alert-danger">
+
+                <strong>Terjadi kesalahan!</strong>
+
+                <ul class="mb-0 mt-2">
+
+                    @foreach ($errors->all() as $error)
+
+                        <li>{{ $error }}</li>
+
+                    @endforeach
+
+                </ul>
+
+            </div>
+
+            @endif
+
+            <form action="{{ route('shipments.update',$shipment->id) }}" method="POST">
+
+                @csrf
+                @method('PUT')
+
+                @include('shipment.form')
+
+                <div class="d-flex justify-content-end gap-2 mt-4">
+
+                    <a href="{{ route('shipments.index') }}"
+                       class="btn btn-secondary">
+
+                        <i class="bi bi-arrow-left"></i>
+                        Back
+
+                    </a>
+
+                    <button
+                        type="submit"
+                        class="btn btn-warning">
+
+                        <i class="bi bi-check-circle"></i>
+                        Update Shipment
+
+                    </button>
 
                 </div>
 
-                <a href="{{ route('shipments.index') }}" class="btn btn-secondary rounded-pill">
-
-                    <i class="bi bi-arrow-left"></i>
-
-                    Back
-
-                </a>
-
-            </div>
-
-            <div class="card border-0 shadow rounded-4">
-
-                <div class="card-body p-4">
-
-                    <form action="{{ route('shipments.update',$shipment->id) }}" method="POST">
-
-                        @csrf
-
-                        @method('PUT')
-
-                        @include('shipment.form')
-
-                    </form>
-
-                </div>
-
-            </div>
+            </form>
 
         </div>
 
@@ -60,3 +76,47 @@
 </div>
 
 @endsection
+
+@push('scripts')
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+
+document.querySelector("form").addEventListener("submit",function(e){
+
+    e.preventDefault();
+
+    let form=this;
+
+    Swal.fire({
+
+        title:"Update Shipment?",
+
+        text:"Data shipment akan diperbarui.",
+
+        icon:"question",
+
+        showCancelButton:true,
+
+        confirmButtonText:"Update",
+
+        cancelButtonText:"Batal",
+
+        confirmButtonColor:"#f59e0b"
+
+    }).then((result)=>{
+
+        if(result.isConfirmed){
+
+            form.submit();
+
+        }
+
+    });
+
+});
+
+</script>
+
+@endpush

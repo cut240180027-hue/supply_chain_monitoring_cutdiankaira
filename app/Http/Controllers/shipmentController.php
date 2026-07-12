@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Shipment;
+use App\Models\Supplier;
+use App\Models\Country;
+use App\Models\Port;
 use Illuminate\Http\Request;
 
 class ShipmentController extends Controller
@@ -12,7 +15,13 @@ class ShipmentController extends Controller
      */
     public function index()
     {
-        $shipments = Shipment::latest()->paginate(10);
+        $shipments = Shipment::with([
+            'supplier',
+            'originCountry',
+            'destinationCountry',
+            'originPort',
+            'destinationPort'
+        ])->latest()->paginate(10);
 
         return view('shipment.index', compact('shipments'));
     }
@@ -22,7 +31,15 @@ class ShipmentController extends Controller
      */
     public function create()
     {
-        return view('shipment.create');
+        $suppliers = Supplier::all();
+        $countries = Country::all();
+        $ports = Port::all();
+
+        return view('shipment.create', compact(
+            'suppliers',
+            'countries',
+            'ports'
+        ));
     }
 
     /**
@@ -31,27 +48,27 @@ class ShipmentController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'shipment_code'      => 'required|unique:shipments',
-            'supplier'           => 'required',
-            'origin_country'     => 'required',
-            'destination_country'=> 'required',
-            'origin_port'        => 'required',
-            'destination_port'   => 'required',
-            'vessel_name'        => 'required',
-            'departure_date'     => 'required|date',
-            'estimated_arrival'  => 'required|date',
-            'status'             => 'required',
-            'risk_level'         => 'required',
-            'latitude'           => 'nullable',
-            'longitude'          => 'nullable',
-            'description'        => 'nullable',
+            'shipment_code' => 'required|unique:shipments',
+            'supplier_id' => 'required|exists:suppliers,id',
+            'origin_country_id' => 'required|exists:countries,id',
+            'destination_country_id' => 'required|exists:countries,id',
+            'origin_port_id' => 'required|exists:ports,id',
+            'destination_port_id' => 'required|exists:ports,id',
+            'vessel_name' => 'required',
+            'departure_date' => 'required|date',
+            'estimated_arrival' => 'required|date',
+            'status' => 'required',
+            'risk_level' => 'required',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
+            'description' => 'nullable'
         ]);
 
         Shipment::create($request->all());
 
         return redirect()
-                ->route('shipments.index')
-                ->with('success','Shipment berhasil ditambahkan.');
+            ->route('shipments.index')
+            ->with('success', 'Shipment berhasil ditambahkan.');
     }
 
     /**
@@ -59,6 +76,17 @@ class ShipmentController extends Controller
      */
     public function show(Shipment $shipment)
     {
+        $shipment->load([
+            'supplier',
+            'originCountry',
+            'destinationCountry',
+            'originPort',
+            'destinationPort',
+            'weatherLogs',
+            'exchangeRates',
+            'riskScore'
+        ]);
+
         return view('shipment.show', compact('shipment'));
     }
 
@@ -67,7 +95,16 @@ class ShipmentController extends Controller
      */
     public function edit(Shipment $shipment)
     {
-        return view('shipment.edit', compact('shipment'));
+        $suppliers = Supplier::all();
+        $countries = Country::all();
+        $ports = Port::all();
+
+        return view('shipment.edit', compact(
+            'shipment',
+            'suppliers',
+            'countries',
+            'ports'
+        ));
     }
 
     /**
@@ -76,24 +113,27 @@ class ShipmentController extends Controller
     public function update(Request $request, Shipment $shipment)
     {
         $request->validate([
-            'shipment_code'      => 'required|unique:shipments,shipment_code,'.$shipment->id,
-            'supplier'           => 'required',
-            'origin_country'     => 'required',
-            'destination_country'=> 'required',
-            'origin_port'        => 'required',
-            'destination_port'   => 'required',
-            'vessel_name'        => 'required',
-            'departure_date'     => 'required|date',
-            'estimated_arrival'  => 'required|date',
-            'status'             => 'required',
-            'risk_level'         => 'required',
+            'shipment_code' => 'required|unique:shipments,shipment_code,' . $shipment->id,
+            'supplier_id' => 'required|exists:suppliers,id',
+            'origin_country_id' => 'required|exists:countries,id',
+            'destination_country_id' => 'required|exists:countries,id',
+            'origin_port_id' => 'required|exists:ports,id',
+            'destination_port_id' => 'required|exists:ports,id',
+            'vessel_name' => 'required',
+            'departure_date' => 'required|date',
+            'estimated_arrival' => 'required|date',
+            'status' => 'required',
+            'risk_level' => 'required',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
+            'description' => 'nullable'
         ]);
 
         $shipment->update($request->all());
 
         return redirect()
-                ->route('shipments.index')
-                ->with('success','Shipment berhasil diperbarui.');
+            ->route('shipments.index')
+            ->with('success', 'Shipment berhasil diperbarui.');
     }
 
     /**
@@ -104,7 +144,7 @@ class ShipmentController extends Controller
         $shipment->delete();
 
         return redirect()
-                ->route('shipments.index')
-                ->with('success','Shipment berhasil dihapus.');
+            ->route('shipments.index')
+            ->with('success', 'Shipment berhasil dihapus.');
     }
 }

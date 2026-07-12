@@ -47,40 +47,35 @@
 
         </li>
 
-        <!-- Menu lainnya (sementara belum aktif) -->
-
+        <!-- Live Tracking -->
         <li class="nav-item mb-2">
 
-            <a href="#" class="nav-link">
+            <a href="{{ route('tracking.index') }}"
+               class="nav-link {{ request()->routeIs('tracking.*') ? 'active' : '' }}">
 
                 <i class="bi bi-geo-alt me-2"></i>
 
                 Live Tracking
 
-                <span class="badge bg-light text-dark float-end">
-                    Soon
-                </span>
-
             </a>
 
         </li>
 
+        <!-- Weather -->
         <li class="nav-item mb-2">
 
-            <a href="#" class="nav-link">
+            <a href="{{ route('weather.index') }}"
+               class="nav-link {{ request()->routeIs('weather.*') ? 'active' : '' }}">
 
                 <i class="bi bi-cloud-sun me-2"></i>
 
                 Weather
 
-                <span class="badge bg-light text-dark float-end">
-                    Soon
-                </span>
-
             </a>
 
         </li>
 
+        <!-- Currency -->
         <li class="nav-item mb-2">
 
             <a href="#" class="nav-link">
@@ -97,22 +92,49 @@
 
         </li>
 
+        <!-- Countries -->
         <li class="nav-item mb-2">
 
-            <a href="#" class="nav-link">
+            <a href="{{ route('countries.index') }}"
+               class="nav-link {{ request()->routeIs('countries.*') ? 'active' : '' }}">
 
                 <i class="bi bi-globe2 me-2"></i>
 
                 Countries
 
-                <span class="badge bg-light text-dark float-end">
-                    Soon
-                </span>
+            </a>
+
+        </li>
+
+        <!-- Ports -->
+        <li class="nav-item mb-2">
+
+            <a href="{{ route('ports.index') }}"
+               class="nav-link {{ request()->routeIs('ports.*') ? 'active' : '' }}">
+
+                <i class="bi bi-signpost-2 me-2"></i>
+
+                Ports
 
             </a>
 
         </li>
 
+        <!-- Suppliers -->
+        <li class="nav-item mb-2">
+
+            <a href="{{ route('suppliers.index') }}"
+               class="nav-link {{ request()->routeIs('suppliers.*') ? 'active' : '' }}">
+
+                <i class="bi bi-building me-2"></i>
+
+                Suppliers
+
+            </a>
+
+        </li>
+
+        <!-- Economy -->
         <li class="nav-item mb-2">
 
             <a href="#" class="nav-link">
@@ -129,6 +151,7 @@
 
         </li>
 
+        <!-- News -->
         <li class="nav-item mb-2">
 
             <a href="#" class="nav-link">
@@ -145,6 +168,7 @@
 
         </li>
 
+        <!-- Risk Score -->
         <li class="nav-item mb-2">
 
             <a href="#" class="nav-link">

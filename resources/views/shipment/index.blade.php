@@ -30,8 +30,6 @@
 
     </div>
 
-    <!-- Flash Message -->
-
     @if(session('success'))
 
     <div class="alert alert-success alert-dismissible fade show">
@@ -47,7 +45,6 @@
     @endif
 
     <!-- Search -->
-
     <div class="card border-0 shadow-sm rounded-4 mb-4">
 
         <div class="card-body">
@@ -155,28 +152,45 @@
 
                         <td>
 
-                            {{ $shipment->supplier }}
+                            {{ $shipment->supplier->company_name ?? '-' }}
 
                         </td>
 
                         <td>
 
-                            {{ $shipment->origin_country }}
+                            <strong>
+                                {{ $shipment->originCountry->country_name ?? '-' }}
+                            </strong>
+
+                            <br>
+
+                            <small class="text-muted">
+                                {{ $shipment->originPort->port_name ?? '-' }}
+                            </small>
 
                         </td>
 
                         <td>
 
-                            {{ $shipment->destination_country }}
+                            <strong>
+                                {{ $shipment->destinationCountry->country_name ?? '-' }}
+                            </strong>
+
+                            <br>
+
+                            <small class="text-muted">
+                                {{ $shipment->destinationPort->port_name ?? '-' }}
+                            </small>
 
                         </td>
 
                         <td>
 
-                            {{ $shipment->estimated_arrival }}
+                            {{ \Carbon\Carbon::parse($shipment->estimated_arrival)->format('d M Y') }}
 
                         </td>
-                                                <td>
+
+                        <td>
 
                             @if($shipment->status == 'Pending')
 
@@ -256,6 +270,7 @@
                                     @method('DELETE')
 
                                     <button
+                                        type="button"
                                         class="btn btn-danger btn-sm btn-delete">
 
                                         <i class="bi bi-trash"></i>
@@ -319,7 +334,10 @@
 </div>
 
 @endsection
+
 @push('scripts')
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
