@@ -4,13 +4,13 @@
 <style>
     /* ===== WEATHER PAGE STYLES ===== */
     .weather-hero {
-        background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+        background: linear-gradient(135deg, #9D174D 0%, #DB2777 50%, #EC4899 100%);
         border-radius: 20px;
-        padding: 28px 28px 24px;
+        padding: 28px;
         margin-bottom: 20px;
         position: relative;
         overflow: hidden;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+        box-shadow: 0 8px 32px rgba(236,72,153,0.3);
     }
     .weather-hero::before {
         content: '';
@@ -19,21 +19,51 @@
         pointer-events: none;
     }
 
-    /* City selector pills */
-    .city-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
-    .city-pill {
-        display: inline-flex; align-items: center; gap: 6px;
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-size: 0.75rem; font-weight: 600;
-        border: 1.5px solid rgba(255,255,255,0.15);
-        color: rgba(255,255,255,0.65);
-        text-decoration: none;
+    /* Country search & select card */
+    .selector-card {
         background: rgba(255,255,255,0.06);
-        transition: all .2s;
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 14px;
+        padding: 16px;
+        margin-bottom: 24px;
+        backdrop-filter: blur(10px);
     }
-    .city-pill:hover { background: rgba(255,255,255,0.15); color: #fff; border-color: rgba(255,255,255,0.35); }
-    .city-pill.active { background: rgba(255,255,255,0.2); color: #fff; border-color: rgba(255,255,255,0.5); }
+    .selector-title {
+        color: rgba(255,255,255,0.65);
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .selector-title i { font-size: 0.85rem; }
+    
+    .custom-select-wrapper {
+        position: relative;
+    }
+    .custom-select-wrapper i.select-icon {
+        position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+        color: #9ca3af; font-size: 0.95rem;
+    }
+    .weather-select {
+        background-color: #fff;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 16px 10px 40px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #1f2937;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transition: all .2s;
+        cursor: pointer;
+    }
+    .weather-select:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(236,72,153,0.3);
+    }
 
     /* Current weather big display */
     .current-weather {
@@ -100,7 +130,7 @@
         border: 1.5px solid #f3f4f6;
         transition: all .2s;
     }
-    .forecast-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); border-color: #e5e7eb; }
+    .forecast-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(236,72,153,0.12); border-color: #fce7f3; }
     .forecast-day  { font-size: 0.72rem; font-weight: 600; color: #9ca3af; text-transform: uppercase; }
     .forecast-icon { font-size: 1.6rem; margin: 8px 0; display: block; }
     .forecast-max  { font-size: 0.9rem; font-weight: 700; color: #1f2937; }
@@ -178,21 +208,33 @@
 {{-- ===== HERO SECTION ===== --}}
 <div class="weather-hero">
 
-    {{-- City Pills --}}
-    <div class="city-pills">
-        @foreach($ports as $p)
-            <a href="{{ route('weather.index', ['city' => $p['city']]) }}"
-               class="city-pill {{ $selectedCity === $p['city'] ? 'active' : '' }}">
-                {{ $p['flag'] }} {{ $p['city'] }}
-            </a>
-        @endforeach
+    {{-- Country Search & Selector --}}
+    <div class="selector-card">
+        <div class="selector-title">
+            <i class="bi bi-globe"></i> Pilih Negara Pemantauan
+        </div>
+        <form action="{{ route('weather.index') }}" method="GET" id="countryWeatherForm">
+            <div class="custom-select-wrapper">
+                <i class="bi bi-search select-icon"></i>
+                <select name="country" class="form-select weather-select" onchange="document.getElementById('countryWeatherForm').submit();">
+                    @foreach($countries as $c)
+                        @php
+                            $cFlag = WeatherController::getFlagEmoji($c->country_code);
+                        @endphp
+                        <option value="{{ $c->country_code }}" {{ $selectedCountry && $selectedCountry->country_code === $c->country_code ? 'selected' : '' }}>
+                            {{ $cFlag }} {{ $c->country_name }} ({{ $c->capital ?: 'N/A' }})
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+        </form>
     </div>
 
     @if($error)
         <div class="alert-api-err">
             <i class="bi bi-exclamation-triangle-fill"></i> {{ $error }}
         </div>
-    @elseif($cur)
+    @elseif($cur && $selectedCountry)
         <div class="current-weather">
             {{-- Suhu utama --}}
             <div class="weather-temp-main">
@@ -205,8 +247,8 @@
                 <div class="weather-desc">{{ $codeInfo['label'] }}</div>
                 <div class="weather-location">
                     <i class="bi bi-geo-alt"></i>
-                    {{ $portData['city'] }}, {{ $portData['country'] }}
-                    &nbsp;·&nbsp; {{ $portData['lat'] }}, {{ $portData['lon'] }}
+                    Ibukota: <strong>{{ $selectedCountry->capital ?: '-' }}</strong> &nbsp;·&nbsp; {{ $selectedCountry->country_name }}
+                    &nbsp;·&nbsp; Lat/Lon: {{ number_format($selectedCountry->latitude, 4) }}, {{ number_format($selectedCountry->longitude, 4) }}
                 </div>
                 <span class="risk-badge risk-{{ $risk }}">{{ $riskLabel }}</span>
             </div>
@@ -243,7 +285,7 @@
     @endif
 </div>
 
-@if($weather && !$error)
+@if($weather && !$error && $selectedCountry)
 
 {{-- ===== 7-DAY FORECAST ===== --}}
 <div class="mb-4">
@@ -327,9 +369,9 @@
     </div>
 </div>
 
-{{-- ===== PORT CONDITIONS TABLE ===== --}}
+{{-- ===== DETAILED CONDITIONS TABLE ===== --}}
 <div class="chart-card">
-    <p class="section-title"><i class="bi bi-info-circle me-1"></i> Detail Kondisi Saat Ini — {{ $portData['city'] }}</p>
+    <p class="section-title"><i class="bi bi-info-circle me-1"></i> Detail Kondisi Saat Ini — Ibukota {{ $selectedCountry->capital ?: 'N/A' }}</p>
     <div class="info-grid">
         <div class="info-item">
             <span class="info-item-icon">🌡</span>
@@ -363,7 +405,7 @@
         </div>
         <div class="info-item">
             <span class="info-item-icon">📦</span>
-            <span class="info-item-label">Status Pengiriman</span>
+            <span class="info-item-label">Status Logistik</span>
             <span class="info-item-val" style="font-size:0.85rem;color:{{ $risk === 'low' ? '#10b981' : ($risk === 'medium' ? '#f59e0b' : '#ef4444') }};">
                 {{ $riskLabel }}
             </span>

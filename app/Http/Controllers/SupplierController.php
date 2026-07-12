@@ -10,7 +10,7 @@ class SupplierController extends Controller
 {
     public function index()
     {
-        $suppliers = Supplier::with('country')->paginate(10);
+        $suppliers = Supplier::with(['country', 'shipments'])->paginate(10);
 
         return view('suppliers.index', compact('suppliers'));
     }
@@ -38,6 +38,8 @@ class SupplierController extends Controller
 
     public function show(Supplier $supplier)
     {
+        $supplier->load(['country', 'shipments.destinationCountry', 'shipments.destinationPort']);
+
         return view('suppliers.show', compact('supplier'));
     }
 

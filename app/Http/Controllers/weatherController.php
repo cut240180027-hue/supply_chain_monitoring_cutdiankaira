@@ -7,33 +7,37 @@ use Illuminate\Support\Facades\Http;
 
 class WeatherController extends Controller
 {
-    /**
-     * Daftar kota pelabuhan penting untuk supply chain monitoring.
-     */
-    private array $ports = [
-        ['city' => 'Jakarta',     'country' => 'Indonesia',   'lat' => -6.2088,  'lon' => 106.8456,  'flag' => '🇮🇩'],
-        ['city' => 'Singapore',   'country' => 'Singapore',   'lat' => 1.3521,   'lon' => 103.8198,  'flag' => '🇸🇬'],
-        ['city' => 'Shanghai',    'country' => 'China',       'lat' => 31.2304,  'lon' => 121.4737,  'flag' => '🇨🇳'],
-        ['city' => 'Dubai',       'country' => 'UAE',         'lat' => 25.2048,  'lon' => 55.2708,   'flag' => '🇦🇪'],
-        ['city' => 'Rotterdam',   'country' => 'Netherlands', 'lat' => 51.9225,  'lon' => 4.4792,    'flag' => '🇳🇱'],
-        ['city' => 'Los Angeles', 'country' => 'USA',         'lat' => 33.7490,  'lon' => -118.1937, 'flag' => '🇺🇸'],
-        ['city' => 'Mumbai',      'country' => 'India',       'lat' => 18.9388,  'lon' => 72.8354,   'flag' => '🇮🇳'],
-        ['city' => 'Tokyo',       'country' => 'Japan',       'lat' => 35.6762,  'lon' => 139.6503,  'flag' => '🇯🇵'],
-        ['city' => 'Sydney',      'country' => 'Australia',   'lat' => -33.8688, 'lon' => 151.2093,  'flag' => '🇦🇺'],
-        ['city' => 'Hamburg',     'country' => 'Germany',     'lat' => 53.5753,  'lon' => 10.0153,   'flag' => '🇩🇪'],
-        ['city' => 'Surabaya',    'country' => 'Indonesia',   'lat' => -7.2575,  'lon' => 112.7521,  'flag' => '🇮🇩'],
-        ['city' => 'Hong Kong',   'country' => 'China',       'lat' => 22.3193,  'lon' => 114.1694,  'flag' => '🇭🇰'],
-    ];
+    public static function getFlagEmoji(string $code): string
+    {
+        if (strlen($code) !== 2) return '';
+        $chars = str_split(strtoupper($code));
+        return mb_chr(ord($chars[0]) - 65 + 0x1F1E6) . mb_chr(ord($chars[1]) - 65 + 0x1F1E6);
+    }
 
     public function index(Request $request)
     {
-        $selectedCity = $request->get('city', 'Jakarta');
+        $countries = \App\Models\Country::whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->orderBy('country_name')
+            ->get();
 
-        $portData = collect($this->ports)->firstWhere('city', $selectedCity)
-                    ?? $this->ports[0];
+        if ($countries->isEmpty()) {
+            return view('weather.index', [
+                'countries'       => collect(),
+                'selectedCountry' => null,
+                'weather'         => null,
+                'error'           => 'Belum ada data negara di database. Silakan lakukan sinkronisasi data negara terlebih dahulu.',
+            ]);
+        }
 
-        $lat = $portData['lat'];
-        $lon = $portData['lon'];
+        // Tentukan country terpilih, default Indonesia (ID) jika ada, jika tidak ambil pertama
+        $selectedCode = strtoupper($request->get('country', 'ID'));
+        $selectedCountry = $countries->firstWhere('country_code', $selectedCode) 
+            ?? $countries->firstWhere('country_code', 'ID') 
+            ?? $countries->first();
+
+        $lat = $selectedCountry->latitude;
+        $lon = $selectedCountry->longitude;
 
         $response = Http::timeout(15)->get('https://api.open-meteo.com/v1/forecast', [
             'latitude'      => $lat,
@@ -51,15 +55,14 @@ class WeatherController extends Controller
         if ($response->successful()) {
             $weather = $response->json();
         } else {
-            $error = 'Gagal mengambil data cuaca. Coba lagi nanti.';
+            $error = 'Gagal mengambil data cuaca dari API Open-Meteo. Silakan coba beberapa saat lagi.';
         }
 
         return view('weather.index', [
-            'ports'        => $this->ports,
-            'selectedCity' => $selectedCity,
-            'portData'     => $portData,
-            'weather'      => $weather,
-            'error'        => $error,
+            'countries'       => $countries,
+            'selectedCountry' => $selectedCountry,
+            'weather'         => $weather,
+            'error'           => $error,
         ]);
     }
 

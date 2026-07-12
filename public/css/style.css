@@ -10,7 +10,7 @@
 
 body{
     font-family:'Poppins',sans-serif;
-    background:#FFF6FB;
+    background: linear-gradient(180deg, #FFF0F6 0%, #FFF6FB 100%);
     overflow-x:hidden;
 }
 
@@ -212,6 +212,7 @@ a{
 .dashboard-card:hover{
 
     transform:translateY(-5px);
+    box-shadow: 0 8px 24px rgba(236,72,153,0.12);
 
 }
 
@@ -326,11 +327,8 @@ a{
 }
 
 .table thead{
-
-    background:#EC4899;
-
+    background: linear-gradient(90deg, #EC4899, #DB2777);
     color:white;
-
 }
 
 /*=====================================================
@@ -435,3 +433,92 @@ canvas{
     padding:20px;
 
 }
+
+/*=====================================================
+        PINK THEME GLOBAL OVERRIDES
+======================================================*/
+
+/* Form Controls — pink focus ring */
+.form-control:focus,
+.form-select:focus {
+    border-color: #EC4899 !important;
+    box-shadow: 0 0 0 0.2rem rgba(236, 72, 153, 0.18) !important;
+    outline: none !important;
+}
+
+/* Bootstrap primary override → pink */
+.btn-primary {
+    background: linear-gradient(135deg, #EC4899, #DB2777) !important;
+    border-color: #DB2777 !important;
+    color: #fff !important;
+}
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+    background: linear-gradient(135deg, #DB2777, #9D174D) !important;
+    border-color: #9D174D !important;
+    box-shadow: 0 4px 14px rgba(236,72,153,0.35) !important;
+}
+
+/* Bootstrap outline-primary → pink */
+.btn-outline-primary {
+    color: #EC4899 !important;
+    border-color: #EC4899 !important;
+}
+.btn-outline-primary:hover {
+    background-color: #EC4899 !important;
+    color: #fff !important;
+}
+
+/* Links */
+a.text-primary, .text-primary { color: #EC4899 !important; }
+
+/* Badges: bg-primary */
+.bg-primary { background-color: #EC4899 !important; }
+
+/* Progress bars */
+.progress-bar.bg-primary { background-color: #EC4899 !important; }
+
+/* Badge outline */
+.badge.bg-primary { background-color: #EC4899 !important; }
+
+/* Pagination — global bootstrap override */
+.page-item.active .page-link {
+    background-color: #EC4899 !important;
+    border-color: #EC4899 !important;
+}
+.page-link:hover {
+    color: #EC4899 !important;
+}
+.page-link:focus {
+    box-shadow: 0 0 0 0.2rem rgba(236,72,153,0.25) !important;
+    color: #EC4899 !important;
+}
+
+/* Card hover — subtle pink glow */
+.card:hover {
+    box-shadow: 0 8px 28px rgba(236,72,153,0.09) !important;
+    transition: box-shadow 0.25s ease;
+}
+
+/* Input-group-text pink icon on focus sibling */
+.input-group:focus-within .input-group-text {
+    border-color: #EC4899;
+    color: #EC4899;
+}
+
+/* Dropdown items active */
+.dropdown-item:active {
+    background-color: #EC4899 !important;
+}
+
+/* Scrollbar accent */
+::-webkit-scrollbar-thumb {
+    background: #f9a8d4;
+    border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #EC4899;
+}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #fdf2f8; }

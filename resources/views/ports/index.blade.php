@@ -2,7 +2,7 @@
 
 @push('styles')
 <style>
-    .countries-header {
+    .ports-header {
         background: linear-gradient(135deg, #EC4899 0%, #DB2777 50%, #9D174D 100%);
         border-radius: 16px;
         padding: 20px 24px;
@@ -10,9 +10,9 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        box-shadow: 0 4px 24px rgba(236,72,153,0.18);
+        box-shadow: 0 4px 24px rgba(236,72,153,0.2);
     }
-    .countries-header h4 {
+    .ports-header h4 {
         color: #fff;
         font-weight: 700;
         font-size: 1.1rem;
@@ -21,14 +21,14 @@
         align-items: center;
         gap: 10px;
     }
-    .countries-header h4 .icon-wrap {
+    .ports-header h4 .icon-wrap {
         width: 36px; height: 36px;
         background: rgba(255,255,255,0.12);
         border-radius: 10px;
         display: flex; align-items: center; justify-content: center;
         font-size: 1rem;
     }
-    .countries-header .subtitle {
+    .ports-header .subtitle {
         color: rgba(255,255,255,0.55);
         font-size: 0.75rem;
         margin-top: 2px;
@@ -78,17 +78,17 @@
     .search-wrap input:focus { border-color: #EC4899; box-shadow: 0 0 0 3px rgba(236,72,153,.12); }
 
     /* Table */
-    .countries-card {
+    .ports-card {
         border-radius: 16px;
         border: none;
         box-shadow: 0 2px 16px rgba(0,0,0,0.07);
         overflow: hidden;
     }
-    .table-countries {
+    .table-ports {
         margin: 0;
         font-size: 0.82rem;
     }
-    .table-countries thead th {
+    .table-ports thead th {
         background: #f8f9fe;
         color: #6b7280;
         font-weight: 600;
@@ -99,51 +99,32 @@
         padding: 10px 14px;
         white-space: nowrap;
     }
-    .table-countries tbody tr {
+    .table-ports tbody tr {
         transition: background .15s;
         border-bottom: 1px solid #f3f4f6;
     }
-    .table-countries tbody tr:hover { background: #fff0f6; }
-    .table-countries tbody td {
+    .table-ports tbody tr:hover { background: #fff0f6; }
+    .table-ports tbody td {
         padding: 8px 14px;
         vertical-align: middle;
         color: #374151;
     }
-    .table-countries tbody tr:last-child { border-bottom: none; }
+    .table-ports tbody tr:last-child { border-bottom: none; }
 
     /* Flag + name cell */
     .country-flag { font-size: 1.3rem; line-height: 1; }
-    .country-name-cell { display: flex; align-items: center; gap: 10px; }
-    .country-name-text { font-weight: 600; color: #1f2937; font-size: 0.82rem; }
+    .country-cell { display: flex; align-items: center; gap: 8px; }
+    .country-name { font-weight: 600; color: #1f2937; font-size: 0.82rem; }
 
-    /* Code badge */
-    .badge-code {
-        background: #fff0f6;
-        color: #db2777;
-        font-weight: 700;
-        font-size: 0.7rem;
-        padding: 3px 8px;
-        border-radius: 6px;
-        letter-spacing: .04em;
+    /* Coordinate badges */
+    .badge-latlon {
+        background: #f3f4f6;
+        color: #4b5563;
+        font-family: monospace;
+        font-size: 0.75rem;
+        padding: 2px 6px;
+        border-radius: 4px;
     }
-
-    /* Region badge */
-    .badge-region {
-        font-size: 0.68rem;
-        font-weight: 600;
-        padding: 3px 9px;
-        border-radius: 20px;
-    }
-    .region-americas  { background:#fef3c7; color:#92400e; }
-    .region-europe    { background:#dbeafe; color:#1e40af; }
-    .region-asia      { background:#d1fae5; color:#065f46; }
-    .region-africa    { background:#ffe4e6; color:#9f1239; }
-    .region-oceania   { background:#ede9fe; color:#5b21b6; }
-    .region-antarctic { background:#f3f4f6; color:#374151; }
-
-    /* Currency */
-    .currency-text { color: #6b7280; font-size: 0.78rem; }
-    .currency-code { font-weight: 600; color: #374151; font-size: 0.78rem; }
 
     /* Action buttons */
     .action-group { display: flex; gap: 5px; align-items: center; }
@@ -162,7 +143,7 @@
     .btn-act-del    { background: #fff1f2; color: #e11d48; }
     .btn-act-del:hover    { background: #e11d48; color: #fff; transform: translateY(-1px); }
 
-    /* Alert */
+    /* Custom alerts */
     .alert-success-custom {
         background: linear-gradient(135deg, #d1fae5, #a7f3d0);
         border: none;
@@ -201,11 +182,7 @@
     }
     .pagination .page-link:hover { background: #EC4899; color: #fff; border-color: #EC4899; }
     .pagination .page-item.active .page-link { background: #EC4899; border-color: #EC4899; }
-    /* Kecilkan icon SVG panah prev/next bawaan Bootstrap */
-    .pagination .page-link span[aria-hidden] {
-        font-size: 0.7rem;
-        line-height: 1;
-    }
+    .pagination .page-link span[aria-hidden] { font-size: 0.7rem; line-height: 1; }
     .pagination .page-link svg,
     .pagination .page-link span[aria-hidden="true"] {
         width: 10px !important;
@@ -236,21 +213,21 @@
 @section('content')
 
 {{-- Header --}}
-<div class="countries-header">
+<div class="ports-header">
     <div>
         <h4>
-            <span class="icon-wrap"><i class="bi bi-globe2"></i></span>
+            <span class="icon-wrap"><i class="bi bi-anchor"></i></span>
             <span>
-                Data Countries
-                <div class="subtitle">Kelola & sinkronkan data negara</div>
+                Data Ports
+                <div class="subtitle">Kelola & sinkronkan data pelabuhan dunia</div>
             </span>
         </h4>
     </div>
     <div class="d-flex gap-2">
-        <a href="{{ route('countries.sync') }}" class="btn-sync">
+        <a href="{{ route('ports.sync') }}" class="btn-sync">
             <i class="bi bi-arrow-repeat"></i> Sync API
         </a>
-        <a href="{{ route('countries.create') }}" class="btn-add">
+        <a href="{{ route('ports.create') }}" class="btn-add">
             <i class="bi bi-plus-lg"></i> Tambah
         </a>
     </div>
@@ -269,94 +246,75 @@
 @endif
 
 {{-- Card Table --}}
-<div class="countries-card">
+<div class="ports-card">
 
     {{-- Toolbar --}}
     <div class="d-flex align-items-center justify-content-between px-3 py-2" style="border-bottom:1px solid #ebebf0;">
         <span style="font-size:.78rem;color:#9ca3af;">
-            <b style="color:#374151;">{{ $countries->total() }}</b> negara
+            <b style="color:#374151;">{{ $ports->total() }}</b> pelabuhan
         </span>
         <div class="search-wrap">
             <i class="bi bi-search"></i>
-            <input type="text" id="searchInput" placeholder="Cari negara..." class="form-control">
+            <input type="text" id="searchInput" placeholder="Cari pelabuhan..." class="form-control">
         </div>
     </div>
 
     {{-- Table --}}
     <div class="table-responsive">
-        <table class="table table-countries" id="countriesTable">
+        <table class="table table-ports" id="portsTable">
             <thead>
                 <tr>
-                    <th width="40">#</th>
+                    <th width="50">#</th>
+                    <th>Nama Pelabuhan</th>
                     <th>Negara</th>
-                    <th>Kode</th>
-                    <th>Ibukota</th>
-                    <th>Region</th>
-                    <th>Mata Uang</th>
-                    <th width="100" class="text-center">Aksi</th>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                    <th width="120" class="text-center">Aksi</th>
                 </tr>
             </thead>
             <tbody>
-            @forelse($countries as $country)
+            @forelse($ports as $port)
                 <tr>
-                    <td style="color:#9ca3af;font-size:.75rem;">{{ $loop->iteration + ($countries->currentPage()-1) * $countries->perPage() }}</td>
-
+                    <td style="color:#9ca3af;font-size:.75rem;">{{ $loop->iteration + ($ports->currentPage()-1) * $ports->perPage() }}</td>
+                    
+                    <td><strong style="color: #1f2937;">{{ $port->port_name }}</strong></td>
+                    
                     <td>
-                        <div class="country-name-cell">
-                            {{-- flag emoji dari kode negara (Unicode regional indicator) --}}
+                        <div class="country-cell">
                             @php
                                 $flag = '';
-                                if (strlen($country->country_code) === 2) {
-                                    $chars = str_split(strtoupper($country->country_code));
+                                if ($port->country && strlen($port->country->country_code) === 2) {
+                                    $chars = str_split(strtoupper($port->country->country_code));
                                     $flag = mb_chr(ord($chars[0]) - 65 + 0x1F1E6) . mb_chr(ord($chars[1]) - 65 + 0x1F1E6);
                                 }
                             @endphp
-                            <span class="country-flag">{{ $flag }}</span>
-                            <span class="country-name-text">{{ $country->country_name }}</span>
+                            @if($flag)
+                                <span class="country-flag" title="{{ $port->country->country_name }}">{{ $flag }}</span>
+                            @endif
+                            <span class="country-name">{{ $port->country ? $port->country->country_name : '-' }}</span>
                         </div>
                     </td>
 
-                    <td><span class="badge-code">{{ $country->country_code }}</span></td>
-
-                    <td style="color:#6b7280;font-size:.78rem;">{{ $country->capital ?: '-' }}</td>
-
-                    <td>
-                        @php
-                            $regionMap = [
-                                'Americas' => 'region-americas',
-                                'Europe'   => 'region-europe',
-                                'Asia'     => 'region-asia',
-                                'Africa'   => 'region-africa',
-                                'Oceania'  => 'region-oceania',
-                                'Antarctic'=> 'region-antarctic',
-                            ];
-                            $regionClass = $regionMap[$country->region] ?? 'region-antarctic';
-                        @endphp
-                        <span class="badge-region {{ $regionClass }}">{{ $country->region ?: '-' }}</span>
-                    </td>
-
-                    <td>
-                        <span class="currency-code">{{ $country->currency_code }}</span>
-                        <span class="currency-text"> · {{ Str::limit($country->currency, 20) }}</span>
-                    </td>
+                    <td><span class="badge-latlon">{{ number_format($port->latitude, 4) }}</span></td>
+                    <td><span class="badge-latlon">{{ number_format($port->longitude, 4) }}</span></td>
 
                     <td>
                         <div class="action-group justify-content-center">
-                            <a href="{{ route('countries.show', $country) }}"
+                            <a href="{{ route('ports.show', $port) }}"
                                class="btn-act btn-act-detail" title="Detail">
                                 <i class="bi bi-eye"></i>
                             </a>
-                            <a href="{{ route('countries.edit', $country) }}"
+                            <a href="{{ route('ports.edit', $port) }}"
                                class="btn-act btn-act-edit" title="Edit">
                                 <i class="bi bi-pencil"></i>
                             </a>
-                            <form action="{{ route('countries.destroy', $country) }}"
+                            <form action="{{ route('ports.destroy', $port) }}"
                                   method="POST" style="display:inline;">
                                 @csrf @method('DELETE')
                                 <button type="submit"
                                         class="btn-act btn-act-del"
                                         title="Hapus"
-                                        onclick="return confirm('Hapus {{ $country->country_name }}?')">
+                                        onclick="return confirm('Hapus {{ $port->port_name }}?')">
                                     <i class="bi bi-trash3"></i>
                                 </button>
                             </form>
@@ -365,10 +323,10 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7">
+                    <td colspan="6">
                         <div class="empty-state">
-                            <i class="bi bi-globe"></i>
-                            <p>Belum ada data negara.<br>Klik <b>Sync API</b> untuk mengambil data.</p>
+                            <i class="bi bi-anchor"></i>
+                            <p>Belum ada data pelabuhan.<br>Klik <b>Sync API</b> untuk mengambil data.</p>
                         </div>
                     </td>
                 </tr>
@@ -380,10 +338,10 @@
     {{-- Footer pagination --}}
     <div class="table-footer">
         <span>
-            Menampilkan {{ $countries->firstItem() }}–{{ $countries->lastItem() }}
-            dari {{ $countries->total() }} negara
+            Menampilkan {{ $ports->firstItem() ?: 0 }}–{{ $ports->lastItem() ?: 0 }}
+            dari {{ $ports->total() }} pelabuhan
         </span>
-        <div>{{ $countries->links() }}</div>
+        <div>{{ $ports->links() }}</div>
     </div>
 
 </div>
@@ -395,7 +353,7 @@
     // Client-side search (filter baris yang tampil)
     document.getElementById('searchInput').addEventListener('input', function () {
         const q = this.value.toLowerCase();
-        document.querySelectorAll('#countriesTable tbody tr').forEach(row => {
+        document.querySelectorAll('#portsTable tbody tr').forEach(row => {
             row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
         });
     });

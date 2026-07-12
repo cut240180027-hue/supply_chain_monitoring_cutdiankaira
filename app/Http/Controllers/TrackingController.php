@@ -8,7 +8,13 @@ class TrackingController extends Controller
 {
     public function index()
     {
-        $shipments = Shipment::all();
+        $shipments = Shipment::with([
+            'supplier',
+            'originCountry',
+            'destinationCountry',
+            'originPort',
+            'destinationPort'
+        ])->get();
 
         return view('tracking.index', compact('shipments'));
     }

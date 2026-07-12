@@ -78,15 +78,12 @@
         <!-- Currency -->
         <li class="nav-item mb-2">
 
-            <a href="#" class="nav-link">
+            <a href="{{ route('currency.index') }}"
+               class="nav-link {{ request()->routeIs('currency.*') ? 'active' : '' }}">
 
                 <i class="bi bi-currency-dollar me-2"></i>
 
                 Currency
-
-                <span class="badge bg-light text-dark float-end">
-                    Soon
-                </span>
 
             </a>
 
@@ -112,7 +109,7 @@
             <a href="{{ route('ports.index') }}"
                class="nav-link {{ request()->routeIs('ports.*') ? 'active' : '' }}">
 
-                <i class="bi bi-signpost-2 me-2"></i>
+                <i class="bi bi-anchor me-2"></i>
 
                 Ports
 
@@ -137,15 +134,12 @@
         <!-- Economy -->
         <li class="nav-item mb-2">
 
-            <a href="#" class="nav-link">
+            <a href="{{ route('economy.index') }}"
+               class="nav-link {{ request()->routeIs('economy.*') ? 'active' : '' }}">
 
                 <i class="bi bi-bar-chart-line me-2"></i>
 
                 Economy
-
-                <span class="badge bg-light text-dark float-end">
-                    Soon
-                </span>
 
             </a>
 
@@ -154,15 +148,12 @@
         <!-- News -->
         <li class="nav-item mb-2">
 
-            <a href="#" class="nav-link">
+            <a href="{{ route('news.index') }}"
+               class="nav-link {{ request()->routeIs('news.*') ? 'active' : '' }}">
 
                 <i class="bi bi-newspaper me-2"></i>
 
                 News
-
-                <span class="badge bg-light text-dark float-end">
-                    Soon
-                </span>
 
             </a>
 
@@ -171,15 +162,12 @@
         <!-- Risk Score -->
         <li class="nav-item mb-2">
 
-            <a href="#" class="nav-link">
+            <a href="{{ route('risk.index') }}"
+               class="nav-link {{ request()->routeIs('risk.*') ? 'active' : '' }}">
 
-                <i class="bi bi-exclamation-triangle me-2"></i>
+                <i class="bi bi-shield-exclamation me-2"></i>
 
                 Risk Score
-
-                <span class="badge bg-light text-dark float-end">
-                    Soon
-                </span>
 
             </a>
 
