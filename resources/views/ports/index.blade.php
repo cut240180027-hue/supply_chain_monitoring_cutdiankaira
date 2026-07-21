@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @push('styles')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
     .ports-header {
         background: linear-gradient(135deg, #EC4899 0%, #DB2777 50%, #9D174D 100%);
@@ -245,117 +246,215 @@
     </div>
 @endif
 
-{{-- Card Table --}}
-<div class="ports-card">
+{{-- Tab Navigation --}}
+<ul class="nav nav-pills mb-3 px-1" id="portsTab" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active fw-bold px-4" id="table-tab" data-bs-toggle="pill" data-bs-target="#tab-table" type="button" role="tab" style="border-radius:20px; font-size:0.8rem;">
+      <i class="bi bi-table"></i> Tabel View
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link fw-bold px-4" id="map-tab" data-bs-toggle="pill" data-bs-target="#tab-map" type="button" role="tab" style="border-radius:20px; font-size:0.8rem;">
+      <i class="bi bi-map"></i> Map View (Port Location Dashboard)
+    </button>
+  </li>
+</ul>
 
-    {{-- Toolbar --}}
-    <div class="d-flex align-items-center justify-content-between px-3 py-2" style="border-bottom:1px solid #ebebf0;">
-        <span style="font-size:.78rem;color:#9ca3af;">
-            <b style="color:#374151;">{{ $ports->total() }}</b> pelabuhan
-        </span>
-        <div class="search-wrap">
-            <i class="bi bi-search"></i>
-            <input type="text" id="searchInput" placeholder="Cari pelabuhan..." class="form-control">
+<div class="tab-content" id="portsTabContent">
+  {{-- TAB 1: TABLE VIEW --}}
+  <div class="tab-pane fade show active" id="tab-table" role="tabpanel">
+    {{-- Card Table --}}
+    <div class="ports-card">
+
+        {{-- Toolbar --}}
+        <div class="d-flex align-items-center justify-content-between px-3 py-2" style="border-bottom:1px solid #ebebf0;">
+            <span style="font-size:.78rem;color:#9ca3af;">
+                <b style="color:#374151;">{{ $ports->total() }}</b> pelabuhan
+            </span>
+            <div class="search-wrap">
+                <i class="bi bi-search"></i>
+                <input type="text" id="searchInput" placeholder="Cari pelabuhan..." class="form-control">
+            </div>
         </div>
+
+        {{-- Table --}}
+        <div class="table-responsive">
+            <table class="table table-ports" id="portsTable">
+                <thead>
+                    <tr>
+                        <th width="50">#</th>
+                        <th>Nama Pelabuhan</th>
+                        <th>Negara</th>
+                        <th>Latitude</th>
+                        <th>Longitude</th>
+                        <th width="120" class="text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @forelse($ports as $port)
+                    <tr>
+                        <td style="color:#9ca3af;font-size:.75rem;">{{ $loop->iteration + ($ports->currentPage()-1) * $ports->perPage() }}</td>
+                        
+                        <td><strong style="color: #1f2937;">{{ $port->port_name }}</strong></td>
+                        
+                        <td>
+                            <div class="country-cell">
+                                @php
+                                    $flag = '';
+                                    if ($port->country && strlen($port->country->country_code) === 2) {
+                                        $chars = str_split(strtoupper($port->country->country_code));
+                                        $flag = mb_chr(ord($chars[0]) - 65 + 0x1F1E6) . mb_chr(ord($chars[1]) - 65 + 0x1F1E6);
+                                    }
+                                @endphp
+                                @if($flag)
+                                    <span class="country-flag" title="{{ $port->country->country_name }}">{{ $flag }}</span>
+                                @endif
+                                <span class="country-name">{{ $port->country ? $port->country->country_name : '-' }}</span>
+                            </div>
+                        </td>
+
+                        <td><span class="badge-latlon">{{ number_format($port->latitude, 4) }}</span></td>
+                        <td><span class="badge-latlon">{{ number_format($port->longitude, 4) }}</span></td>
+
+                        <td>
+                            <div class="action-group justify-content-center">
+                                <a href="{{ route('ports.show', $port) }}"
+                                   class="btn-act btn-act-detail" title="Detail">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{{ route('ports.edit', $port) }}"
+                                   class="btn-act btn-act-edit" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form action="{{ route('ports.destroy', $port) }}"
+                                      method="POST" style="display:inline;">
+                                    @csrf @method('DELETE')
+                                    <button type="submit"
+                                            class="btn-act btn-act-del"
+                                            title="Hapus"
+                                            onclick="return confirm('Hapus {{ $port->port_name }}?')">
+                                        <i class="bi bi-trash3"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="6">
+                            <div class="empty-state">
+                                <i class="bi bi-anchor"></i>
+                                <p>Belum ada data pelabuhan.<br>Klik <b>Sync API</b> untuk mengambil data.</p>
+                            </div>
+                        </td>
+                    </tr>
+                @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        {{-- Footer pagination --}}
+        <div class="table-footer">
+            <span>
+                Menampilkan {{ $ports->firstItem() ?: 0 }}–{{ $ports->lastItem() ?: 0 }}
+                dari {{ $ports->total() }} pelabuhan
+            </span>
+            <div>{{ $ports->links() }}</div>
+        </div>
+
     </div>
+  </div>
 
-    {{-- Table --}}
-    <div class="table-responsive">
-        <table class="table table-ports" id="portsTable">
-            <thead>
-                <tr>
-                    <th width="50">#</th>
-                    <th>Nama Pelabuhan</th>
-                    <th>Negara</th>
-                    <th>Latitude</th>
-                    <th>Longitude</th>
-                    <th width="120" class="text-center">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-            @forelse($ports as $port)
-                <tr>
-                    <td style="color:#9ca3af;font-size:.75rem;">{{ $loop->iteration + ($ports->currentPage()-1) * $ports->perPage() }}</td>
-                    
-                    <td><strong style="color: #1f2937;">{{ $port->port_name }}</strong></td>
-                    
-                    <td>
-                        <div class="country-cell">
-                            @php
-                                $flag = '';
-                                if ($port->country && strlen($port->country->country_code) === 2) {
-                                    $chars = str_split(strtoupper($port->country->country_code));
-                                    $flag = mb_chr(ord($chars[0]) - 65 + 0x1F1E6) . mb_chr(ord($chars[1]) - 65 + 0x1F1E6);
-                                }
-                            @endphp
-                            @if($flag)
-                                <span class="country-flag" title="{{ $port->country->country_name }}">{{ $flag }}</span>
-                            @endif
-                            <span class="country-name">{{ $port->country ? $port->country->country_name : '-' }}</span>
-                        </div>
-                    </td>
-
-                    <td><span class="badge-latlon">{{ number_format($port->latitude, 4) }}</span></td>
-                    <td><span class="badge-latlon">{{ number_format($port->longitude, 4) }}</span></td>
-
-                    <td>
-                        <div class="action-group justify-content-center">
-                            <a href="{{ route('ports.show', $port) }}"
-                               class="btn-act btn-act-detail" title="Detail">
-                                <i class="bi bi-eye"></i>
-                            </a>
-                            <a href="{{ route('ports.edit', $port) }}"
-                               class="btn-act btn-act-edit" title="Edit">
-                                <i class="bi bi-pencil"></i>
-                            </a>
-                            <form action="{{ route('ports.destroy', $port) }}"
-                                  method="POST" style="display:inline;">
-                                @csrf @method('DELETE')
-                                <button type="submit"
-                                        class="btn-act btn-act-del"
-                                        title="Hapus"
-                                        onclick="return confirm('Hapus {{ $port->port_name }}?')">
-                                    <i class="bi bi-trash3"></i>
-                                </button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="6">
-                        <div class="empty-state">
-                            <i class="bi bi-anchor"></i>
-                            <p>Belum ada data pelabuhan.<br>Klik <b>Sync API</b> untuk mengambil data.</p>
-                        </div>
-                    </td>
-                </tr>
-            @endforelse
-            </tbody>
-        </table>
+  {{-- TAB 2: MAP VIEW (PORT LOCATION DASHBOARD) --}}
+  <div class="tab-pane fade" id="tab-map" role="tabpanel">
+    <div class="ports-card p-3">
+        <div class="row g-2 mb-3">
+            <div class="col-md-6">
+                <input type="text" id="mapSearchPort" placeholder="Cari nama pelabuhan..." class="form-control form-control-sm" style="border-radius:8px;font-size:0.8rem;height:36px;">
+            </div>
+            <div class="col-md-6">
+                <input type="text" id="mapSearchCountry" placeholder="Cari nama negara..." class="form-control form-control-sm" style="border-radius:8px;font-size:0.8rem;height:36px;">
+            </div>
+        </div>
+        <div id="allPortsMap" style="height: 480px; border-radius: 12px; border: 1.5px solid #e5e7eb; width: 100%;"></div>
     </div>
-
-    {{-- Footer pagination --}}
-    <div class="table-footer">
-        <span>
-            Menampilkan {{ $ports->firstItem() ?: 0 }}–{{ $ports->lastItem() ?: 0 }}
-            dari {{ $ports->total() }} pelabuhan
-        </span>
-        <div>{{ $ports->links() }}</div>
-    </div>
-
+  </div>
 </div>
 
 @endsection
 
 @push('scripts')
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // Client-side search (filter baris yang tampil)
+    // Client-side search (filter baris yang tampil di tabel)
     document.getElementById('searchInput').addEventListener('input', function () {
         const q = this.value.toLowerCase();
         document.querySelectorAll('#portsTable tbody tr').forEach(row => {
             row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
         });
     });
+
+    // Inisialisasi Peta & Marker Dashboard Pelabuhan Dunia
+    let portMap = null;
+    let portMarkers = [];
+    const allPorts = @json($allPorts);
+
+    document.getElementById('map-tab').addEventListener('shown.bs.tab', function () {
+        if (!portMap) {
+            portMap = L.map('allPortsMap').setView([10, 100], 3);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 18,
+                attribution: '© OpenStreetMap'
+            }).addTo(portMap);
+
+            // Draw all markers
+            allPorts.forEach(port => {
+                if (!port.latitude || !port.longitude) return;
+
+                const marker = L.marker([port.latitude, port.longitude]);
+                marker.bindPopup(`
+                    <div style="font-family:Poppins,sans-serif;font-size:0.75rem;">
+                        <strong>⚓ ${port.port_name}</strong><br>
+                        Negara: ${port.country ? port.country.country_name : '-'}<br>
+                        Koor: ${parseFloat(port.latitude).toFixed(4)}, ${parseFloat(port.longitude).toFixed(4)}
+                    </div>
+                `);
+
+                // Custom attributes for filtering
+                marker.portName = port.port_name.toLowerCase();
+                marker.countryName = (port.country ? port.country.country_name : '').toLowerCase();
+
+                marker.addTo(portMap);
+                portMarkers.push(marker);
+            });
+        } else {
+            // Fix Leaflet viewport bug when rendered inside bootstrap tab
+            portMap.invalidateSize();
+        }
+    });
+
+    // Filter Map Markers dynamically
+    function filterMapMarkers() {
+        const qPort = document.getElementById('mapSearchPort').value.toLowerCase();
+        const qCountry = document.getElementById('mapSearchCountry').value.toLowerCase();
+
+        portMarkers.forEach(marker => {
+            const matchesPort = marker.portName.includes(qPort);
+            const matchesCountry = marker.countryName.includes(qCountry);
+
+            if (matchesPort && matchesCountry) {
+                if (!portMap.hasLayer(marker)) {
+                    marker.addTo(portMap);
+                }
+            } else {
+                if (portMap.hasLayer(marker)) {
+                    portMap.removeLayer(marker);
+                }
+            }
+        });
+    }
+
+    document.getElementById('mapSearchPort').addEventListener('input', filterMapMarkers);
+    document.getElementById('mapSearchCountry').addEventListener('input', filterMapMarkers);
 </script>
 @endpush

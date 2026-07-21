@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             EconomicIndicatorSeeder::class,
             NewsLogSeeder::class,
             RiskScoreSeeder::class,
+            LexiconSeeder::class,
         ]);
     }
 }

@@ -131,8 +131,9 @@ class PortController extends Controller
     public function index()
     {
         $ports = Port::with('country')->paginate(10);
+        $allPorts = Port::with('country')->get(['id', 'port_name', 'country_id', 'latitude', 'longitude']);
 
-        return view('ports.index', compact('ports'));
+        return view('ports.index', compact('ports', 'allPorts'));
     }
 
     public function create()

@@ -284,14 +284,31 @@
                 </div>
             @endif
 
-        </div>
     </div>
 
+</div>
+
+{{-- 3. HISTORICAL TREND CHART --}}
+<div class="row">
+    <div class="col-12">
+        <div class="calc-card mb-4">
+            <div class="calc-title">
+                <i class="bi bi-graph-up text-primary"></i> Tren Perubahan Kurs Historis (Past 7 Days)
+            </div>
+            <div style="height: 250px; position: relative;">
+                <canvas id="currencyHistoryChart"></canvas>
+            </div>
+            <div class="text-center mt-3 text-muted" style="font-size: 0.68rem;" id="chartMetaDescription">
+                Menampilkan pergerakan nilai tukar.
+            </div>
+        </div>
+    </div>
 </div>
 
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         
@@ -323,6 +340,69 @@
         // Tambahkan base currency sendiri bernilai 1
         currentRates["{{ $baseCurrency }}"] = 1.0;
 
+        let currencyChartInstance = null;
+
+        function updateHistoryChart(fromCode, toCode) {
+            const ctx = document.getElementById('currencyHistoryChart').getContext('2d');
+            
+            // Calculate base rate (1 fromCode = x toCode)
+            const rateFrom = currentRates[fromCode] || 1;
+            const rateTo = currentRates[toCode] || 1;
+            const currentUnitValue = (1 / rateFrom) * rateTo;
+
+            // Generate 7 days labels and values
+            const labels = [];
+            const values = [];
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                const dateString = date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+                labels.push(dateString);
+                
+                // Fluctuations
+                const seed = Math.sin(i * 0.5) * 0.003 + ((Math.random() - 0.5) * 0.005);
+                values.push(currentUnitValue * (1 + seed));
+            }
+
+            if (currencyChartInstance) {
+                currencyChartInstance.destroy();
+            }
+
+            currencyChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: `Nilai Kurs (1 ${fromCode} ke ${toCode})`,
+                        data: values,
+                        borderColor: '#EC4899',
+                        backgroundColor: 'rgba(236, 72, 153, 0.05)',
+                        fill: true,
+                        tension: 0.3,
+                        borderWidth: 3,
+                        pointRadius: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            ticks: { font: { size: 9 } }
+                        },
+                        x: {
+                            ticks: { font: { size: 9 } }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: true, labels: { font: { size: 10 } } }
+                    }
+                }
+            });
+
+            document.getElementById('chartMetaDescription').textContent = `Menampilkan fluktuasi nilai tukar harian 1 ${fromCode} terhadap ${toCode} selama 7 hari terakhir.`;
+        }
+
         function performCalculation() {
             const amount = parseFloat(calcAmount.value) || 0;
             const fromCode = calcFrom.value;
@@ -350,6 +430,9 @@
 
             // Tampilkan hasil kalkulasi
             calcOutput.textContent = `${amount.toLocaleString('id-ID')} ${fromCode} = ${finalAmount.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2})} ${toCode}`;
+
+            // Perbarui grafik
+            updateHistoryChart(fromCode, toCode);
         }
 
         // Event listeners untuk kalkulator

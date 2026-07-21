@@ -135,16 +135,17 @@ class Shipment extends Model
             if ($body) {
                 $xml = @simplexml_load_string($body);
                 if ($xml && isset($xml->channel->item)) {
+                    $matchedTexts = [];
                     foreach ($xml->channel->item as $item) {
-                        $text = strtolower($item->title . ' ' . $item->description);
-                        if ($destCountry && str_contains($text, strtolower($destCountry->country_name))) {
-                            if (str_contains($text, 'strike') || str_contains($text, 'war') || str_contains($text, 'crisis') || str_contains($text, 'protest') || str_contains($text, 'conflict')) {
-                                $geopoliticalScore = 85;
-                                break;
-                            } else {
-                                $geopoliticalScore = 50;
-                            }
+                        $text = $item->title . ' ' . $item->description;
+                        if ($destCountry && str_contains(strtolower($text), strtolower($destCountry->country_name))) {
+                            $matchedTexts[] = $text;
                         }
+                    }
+                    if (count($matchedTexts) > 0) {
+                        $batchStats = \App\Services\SentimentAnalyzer::analyzeBatch($matchedTexts);
+                        $geopoliticalScore = 20 + ($batchStats['Negative'] * 0.8) + ($batchStats['Neutral'] * 0.3);
+                        $geopoliticalScore = max(20, min(100, round($geopoliticalScore)));
                     }
                 }
             }

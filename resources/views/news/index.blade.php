@@ -257,6 +257,31 @@
     </a>
 </div>
 
+{{-- Sentiment Analytics Stats --}}
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card p-3 border-0 shadow-sm" style="border-radius: 12px; background: linear-gradient(135deg, #10B981, #059669); color: white;">
+            <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; opacity: 0.8;">Positive Sentiment</div>
+            <h3 class="fw-bold mb-0 mt-1">{{ $sentimentStats['Positive'] }}%</h3>
+            <div style="font-size: 0.7rem; opacity: 0.85;">Berita bernada optimis/stabil</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3 border-0 shadow-sm" style="border-radius: 12px; background: linear-gradient(135deg, #6B7280, #4B5563); color: white;">
+            <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; opacity: 0.8;">Neutral Sentiment</div>
+            <h3 class="fw-bold mb-0 mt-1">{{ $sentimentStats['Neutral'] }}%</h3>
+            <div style="font-size: 0.7rem; opacity: 0.85;">Berita informatif/imbang</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3 border-0 shadow-sm" style="border-radius: 12px; background: linear-gradient(135deg, #EF4444, #DC2626); color: white;">
+            <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; opacity: 0.8;">Negative Sentiment</div>
+            <h3 class="fw-bold mb-0 mt-1">{{ $sentimentStats['Negative'] }}%</h3>
+            <div style="font-size: 0.7rem; opacity: 0.85;">Berita bernada krisis/risiko tinggi</div>
+        </div>
+    </div>
+</div>
+
 {{-- News Grid --}}
 @if(empty($articles))
     <div class="card p-5 text-center text-secondary border-0 shadow-sm" style="border-radius:16px;">
@@ -315,13 +340,30 @@
                         {{ $art['description'] ?: 'Tidak ada deskripsi singkat untuk berita ini. Klik Baca Selengkapnya untuk membuka artikel asli.' }}
                     </p>
 
+                    <div style="background: #f8fafc; border-radius: 8px; padding: 10px; font-size: 0.72rem; margin-bottom: 12px; border: 1px solid #e2e8f0;">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <strong>Analisis Leksikon:</strong>
+                            <span class="badge bg-{{ $art['sentiment_analysis']['sentiment'] === 'Positive' ? 'success' : ($art['sentiment_analysis']['sentiment'] === 'Negative' ? 'danger' : 'secondary') }}">
+                                {{ $art['sentiment_analysis']['sentiment'] }}
+                            </span>
+                        </div>
+                        <div class="text-muted">
+                            <span class="text-success">Positive: {{ $art['sentiment_analysis']['positive_count'] }}</span> 
+                            ({{ count($art['sentiment_analysis']['matched_positives']) > 0 ? implode(', ', $art['sentiment_analysis']['matched_positives']) : '-' }})
+                        </div>
+                        <div class="text-muted">
+                            <span class="text-danger">Negative: {{ $art['sentiment_analysis']['negative_count'] }}</span> 
+                            ({{ count($art['sentiment_analysis']['matched_negatives']) > 0 ? implode(', ', $art['sentiment_analysis']['matched_negatives']) : '-' }})
+                        </div>
+                    </div>
+
                     <div class="news-footer">
                         <a href="{{ $art['url'] }}" target="_blank" class="btn-read">
                             Baca Selengkapnya <i class="bi bi-arrow-right"></i>
                         </a>
                         
                         <span class="text-muted" style="font-size:0.65rem;">
-                            <i class="bi bi-shield-check"></i> Dinilai
+                            <i class="bi bi-shield-check"></i> Dinilai Leksikon
                         </span>
                     </div>
                 </div>

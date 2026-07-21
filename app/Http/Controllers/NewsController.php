@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
+use App\Services\SentimentAnalyzer;
+
 class NewsController extends Controller
 {
     public function index(Request $request)
@@ -127,39 +129,38 @@ class NewsController extends Controller
             $articles = array_slice($articles, 0, 20);
         }
 
-        // Hitung Risk Level berdasarkan kata kunci judul/deskripsi
+        $newsTexts = [];
+
+        // Hitung Risk Level dan Sentiment Analisis Leksikon
         foreach ($articles as &$art) {
-            $text = strtolower($art['title'] . ' ' . $art['description']);
-            
-            $highKeywords   = ['strike', 'closure', 'crisis', 'war', 'attack', 'blockade', 'protest', 'disaster', 'tsunami', 'earthquake', 'storm', 'shutdown', 'bomb', 'explosion'];
-            $mediumKeywords = ['delay', 'inflation', 'disruption', 'tariff', 'sanctions', 'shortage', 'tension', 'dispute', 'decline', 'drop', 'tax', 'cut'];
+            $text = $art['title'] . ' ' . $art['description'];
+            $newsTexts[] = $text;
 
-            $art['risk_level'] = 'Low';
-            $art['risk_color'] = '#10b981'; // Green
+            // Jalankan analisis leksikon
+            $sentimentResult = SentimentAnalyzer::analyze($text);
+            $art['sentiment_analysis'] = $sentimentResult;
 
-            foreach ($highKeywords as $hk) {
-                if (str_contains($text, $hk)) {
-                    $art['risk_level'] = 'High';
-                    $art['risk_color'] = '#ef4444'; // Red
-                    break;
-                }
-            }
-
-            if ($art['risk_level'] === 'Low') {
-                foreach ($mediumKeywords as $mk) {
-                    if (str_contains($text, $mk)) {
-                        $art['risk_level'] = 'Medium';
-                        $art['risk_color'] = '#f59e0b'; // Amber
-                        break;
-                    }
-                }
+            // Klasifikasi risk berdasarkan sentimen leksikon
+            if ($sentimentResult['sentiment'] === 'Negative') {
+                $art['risk_level'] = 'High';
+                $art['risk_color'] = '#ef4444'; // Red
+            } elseif ($sentimentResult['sentiment'] === 'Positive') {
+                $art['risk_level'] = 'Low';
+                $art['risk_color'] = '#10b981'; // Green
+            } else {
+                $art['risk_level'] = 'Medium';
+                $art['risk_color'] = '#f59e0b'; // Amber
             }
         }
 
+        // Hitung distribusi sentimen kategori saat ini
+        $sentimentStats = SentimentAnalyzer::analyzeBatch($newsTexts);
+
         return view('news.index', [
-            'articles'   => $articles,
-            'category'   => $category,
-            'sourceType' => $sourceType,
+            'articles'       => $articles,
+            'category'       => $category,
+            'sourceType'     => $sourceType,
+            'sentimentStats' => $sentimentStats,
         ]);
     }
 }

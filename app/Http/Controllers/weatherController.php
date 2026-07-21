@@ -39,23 +39,27 @@ class WeatherController extends Controller
         $lat = $selectedCountry->latitude;
         $lon = $selectedCountry->longitude;
 
-        $response = Http::timeout(15)->get('https://api.open-meteo.com/v1/forecast', [
-            'latitude'      => $lat,
-            'longitude'     => $lon,
-            'current'       => 'temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation,weather_code,apparent_temperature,surface_pressure',
-            'hourly'        => 'temperature_2m,precipitation_probability,wind_speed_10m',
-            'daily'         => 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,sunrise,sunset',
-            'timezone'      => 'auto',
-            'forecast_days' => 7,
-        ]);
-
         $weather = null;
         $error   = null;
 
-        if ($response->successful()) {
-            $weather = $response->json();
-        } else {
-            $error = 'Gagal mengambil data cuaca dari API Open-Meteo. Silakan coba beberapa saat lagi.';
+        try {
+            $response = Http::timeout(15)->get('https://api.open-meteo.com/v1/forecast', [
+                'latitude'      => $lat,
+                'longitude'     => $lon,
+                'current'       => 'temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation,weather_code,apparent_temperature,surface_pressure',
+                'hourly'        => 'temperature_2m,precipitation_probability,wind_speed_10m',
+                'daily'         => 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,sunrise,sunset',
+                'timezone'      => 'auto',
+                'forecast_days' => 7,
+            ]);
+
+            if ($response->successful()) {
+                $weather = $response->json();
+            } else {
+                $error = 'Gagal mengambil data cuaca dari API Open-Meteo. Silakan coba beberapa saat lagi.';
+            }
+        } catch (\Exception $e) {
+            $error = 'Tidak dapat terhubung ke layanan cuaca. Periksa koneksi internet Anda dan coba lagi.';
         }
 
         return view('weather.index', [

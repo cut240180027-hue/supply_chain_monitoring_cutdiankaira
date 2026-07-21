@@ -173,6 +173,51 @@
 
         </li>
 
+        <!-- Country Dashboard -->
+        <li class="nav-item mb-2">
+            <a href="{{ route('country-dashboard.index') }}"
+               class="nav-link {{ request()->routeIs('country-dashboard.*') ? 'active' : '' }}">
+                <i class="bi bi-speedometer2 me-2"></i>
+                Country Dashboard
+            </a>
+        </li>
+
+        <!-- Country Comparison -->
+        <li class="nav-item mb-2">
+            <a href="{{ route('comparison.index') }}"
+               class="nav-link {{ request()->routeIs('comparison.*') ? 'active' : '' }}">
+                <i class="bi bi-arrow-left-right me-2"></i>
+                Country Comparison
+            </a>
+        </li>
+
+        <!-- Data Visualization -->
+        <li class="nav-item mb-2">
+            <a href="{{ route('visualizations.index') }}"
+               class="nav-link {{ request()->routeIs('visualizations.*') ? 'active' : '' }}">
+                <i class="bi bi-graph-up me-2"></i>
+                Data Visualization
+            </a>
+        </li>
+
+        <!-- Watchlist -->
+        <li class="nav-item mb-2">
+            <a href="{{ route('watchlist.index') }}"
+               class="nav-link {{ request()->routeIs('watchlist.*') ? 'active' : '' }}">
+                <i class="bi bi-star-fill text-warning me-2"></i>
+                Watchlist (Favorit)
+            </a>
+        </li>
+
+        <!-- Admin Control Panel -->
+        <li class="nav-item mb-2">
+            <a href="{{ route('admin.login') }}"
+               class="nav-link {{ request()->routeIs('admin.*') ? 'active' : '' }}">
+                <i class="bi bi-gear-fill me-2"></i>
+                Admin Panel
+            </a>
+        </li>
+
     </ul>
 
     <!-- Footer -->

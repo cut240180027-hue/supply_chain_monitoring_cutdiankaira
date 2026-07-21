@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @push('styles')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
     /* ===== WEATHER PAGE STYLES ===== */
     .weather-hero {
@@ -287,6 +288,19 @@
 
 @if($weather && !$error && $selectedCountry)
 
+{{-- ===== WEATHER HAZARD MAP ===== --}}
+<div class="card p-3 border-0 shadow-sm mb-4" style="border-radius:16px;">
+    <p class="section-title fw-bold mb-2" style="font-size:0.75rem;"><i class="bi bi-map-fill text-primary"></i> Peta Bahaya Cuaca Global (Hujan, Badai, Angin)</p>
+    <div id="weatherHazardMap" style="height: 350px; border-radius: 12px; border: 1.5px solid #e5e7eb;"></div>
+    <div class="text-muted mt-2" style="font-size: 0.68rem;">
+        Peta menampilkan sebaran wilayah cuaca buruk: 
+        <span class="badge bg-danger" style="font-size:0.58rem;padding:2px 6px;">Badai (Kecepatan Angin > 50 km/h)</span>
+        <span class="badge bg-warning text-dark" style="font-size:0.58rem;padding:2px 6px;">Angin Kencang (> 25 km/h)</span>
+        <span class="badge bg-primary" style="font-size:0.58rem;padding:2px 6px;">Hujan Lebat (> 10 mm)</span>
+        <span class="badge bg-success" style="font-size:0.58rem;padding:2px 6px;">Kondisi Aman</span>
+    </div>
+</div>
+
 {{-- ===== 7-DAY FORECAST ===== --}}
 <div class="mb-4">
     <p class="section-title"><i class="bi bi-calendar3 me-1"></i> Prakiraan 7 Hari</p>
@@ -425,8 +439,59 @@
 @endsection
 
 @push('scripts')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
+@if($weather && !$error && $selectedCountry)
+(function () {
+    // Inisialisasi Peta Bahaya Cuaca
+    const map = L.map('weatherHazardMap').setView([{{ $selectedCountry->latitude ?? 0 }}, {{ $selectedCountry->longitude ?? 0 }}], 4);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    // Marker utama negara yang dipilih
+    const mainMarkerColor = "{{ $risk === 'high' ? '#ef4444' : ($risk === 'medium' ? '#f59e0b' : '#10b981') }}";
+    L.circleMarker([{{ $selectedCountry->latitude ?? 0 }}, {{ $selectedCountry->longitude ?? 0 }}], {
+        radius: 12,
+        color: '#fff',
+        weight: 3,
+        fillColor: mainMarkerColor,
+        fillOpacity: 0.85
+    }).addTo(map)
+      .bindPopup(`
+          <div style="font-family:Poppins,sans-serif;font-size:0.75rem;">
+              <strong>{{ $selectedCountry->country_name }} (Terpilih)</strong><br>
+              Status: <b>{{ $riskLabel }}</b><br>
+              Suhu: {{ number_format($cur['temperature_2m'], 1) }}°C<br>
+              Angin: {{ number_format($windSpeed, 1) }} km/h<br>
+              Curah Hujan: {{ number_format($precip, 1) }} mm
+          </div>
+      `).openPopup();
+
+    // Render marker pasif untuk negara lain di database
+    const otherCountries = @json($countries->filter(fn($c) => $c->id !== $selectedCountry->id && $c->latitude && $c->longitude)->values());
+    otherCountries.forEach(c => {
+        L.circleMarker([c.latitude, c.longitude], {
+            radius: 8,
+            color: '#fff',
+            weight: 1.5,
+            fillColor: '#10b981', // green default
+            fillOpacity: 0.6
+        }).addTo(map)
+          .bindPopup(`
+              <div style="font-family:Poppins,sans-serif;font-size:0.72rem;">
+                  <strong>${c.country_name}</strong><br>
+                  Ibukota: ${c.capital || '-'}<br>
+                  <span class="text-muted" style="font-size:0.65rem;">Pilih negara di atas untuk melihat detail cuaca real-time.</span>
+              </div>
+          `);
+    });
+})();
+@endif
+
 @if($weather && !$error && isset($hourly))
 (function () {
     const hours  = @json(array_slice($hourly['time'], 0, 24));
